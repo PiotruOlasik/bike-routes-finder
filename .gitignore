@@ -1,0 +1,5 @@
+.vs/
+*.ipch
+*.log
+node_modules/
+dist/
