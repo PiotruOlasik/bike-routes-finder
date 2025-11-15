@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Prosta trasa rowerowa Kraków</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <style>
+    #map { height: 90vh; width: 100%; }
+    body { margin: 0; }
+  </style>
+</head>
+<body>
+  <h2>Prosta trasa rowerowa Toruń</h2>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([50.06, 19.94], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(map);
+
+    fetch('route_cycleway.geojson')
+      .then(response => response.json())
+      .then(data => {
+        const routeLayer = L.geoJSON(data, {
+          style: { color: 'blue', weight: 5 }
+        }).addTo(map);
+
+        map.fitBounds(routeLayer.getBounds());
+      })
+      .catch(err => {
+        console.error('Błąd wczytywania GeoJSON:', err);
+        alert('Nie udało się wczytać trasy.');
+      });
+  </script>
+</body>
+</html>
