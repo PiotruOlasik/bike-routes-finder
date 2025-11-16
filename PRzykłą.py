@@ -1,1 +1,0 @@
-# Testwanie commita w PyCharmsassa
