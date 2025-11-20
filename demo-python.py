@@ -9,13 +9,25 @@ print(edges.columns)
 #filtrowanie po drogach rowerowych
 cycleways = edges[edges["highway"] == "cycleway"]
 print("Ilość dróg rowerowych:", len(cycleways))
-
+-----------------------------------------------------------------
 import osmnx as ox
 import json
+import random
 
 G = ox.graph_from_place("Chorzów, Polska", network_type="bike")
-orig, dest = list(G.nodes())[0], list(G.nodes())[100]
+
+#orig = random.choice(list(G.nodes()))
+#dest = random.choice(list(G.nodes()))
+
+start_lon, start_lat =18.950313, 50.306321 #Rynek
+end_lon, end_lat =  18.996935, 50.288647 #Wesołe miasteczko Legendia
+
+orig = ox.nearest_nodes(G, start_lon, start_lat)
+dest = ox.nearest_nodes(G, end_lon, end_lat)
+
 path = ox.shortest_path(G, orig, dest, weight="length")
+
+#route_length = ox.routing.route_length(G, path) to nie działa - potrzebny inny sposób na wyznaczenie długosci trasy
 
 # konwersja trasy na współrzędne
 nodes, edges = ox.graph_to_gdfs(G)
@@ -34,6 +46,7 @@ with open("route_chorzow.geojson", "w") as f:
         }]
     }, f)
 
+----------------------------------------------------------------------
 import requests
 import geopandas as gpd
 from shapely.geometry import LineString
@@ -81,5 +94,5 @@ print("
 Typy nawierzchni (surface):")
 print(gdf["surface"].value_counts(dropna=False))
 
-
+------------------------------------------------------------------
  
