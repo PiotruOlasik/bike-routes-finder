@@ -5,7 +5,7 @@ import dijkstra from 'dijkstrajs';
 
 const overpassUrl = 'https://overpass-api.de/api/interpreter';
 
-// 🔹 Pobieramy różne typy dróg, nie tylko "cycleway"
+//Pobieramy różne typy dróg, nie tylko "cycleway"
 const query = `
 [out:json][timeout:25];
 area["name"="Toruń"][admin_level=8];
@@ -17,7 +17,7 @@ out body;
 out skel qt;
 `;
 
-// 🔹 Budowanie grafu dla Dijkstry
+//Budowanie grafu dla Dijkstry
 function buildGraphForDijkstra(osmData) {
   const nodes = new Map();
   const graph = {};
@@ -29,7 +29,7 @@ function buildGraphForDijkstra(osmData) {
     }
   }
 
-  // Utwórz krawędzie (dwukierunkowe)
+  //Utwórz krawędzie (dwukierunkowe)
   for (const el of osmData.elements) {
     if (el.type === 'way' && el.nodes.length >= 2) {
       for (let i = 0; i < el.nodes.length - 1; i++) {
@@ -55,7 +55,7 @@ function buildGraphForDijkstra(osmData) {
   return { nodes, graph };
 }
 
-// 🔹 Znajdź najbliższy węzeł
+//Znajdź najbliższy węzeł
 function findNearestNode(lat, lon, nodes) {
   let nearestId = null;
   let minDist = Infinity;
@@ -69,7 +69,7 @@ function findNearestNode(lat, lon, nodes) {
   return nearestId;
 }
 
-// 🔹 Sprawdzenie, czy start i meta są w tym samym komponencie grafu (BFS)
+//Sprawdzenie, czy start i meta są w tym samym komponencie grafu (BFS)
 function areConnected(graph, start, end) {
   const visited = new Set();
   const queue = [start];
@@ -84,7 +84,7 @@ function areConnected(graph, start, end) {
   return false;
 }
 
-// 🔹 Tworzenie GeoJSON z listy węzłów
+//Tworzenie GeoJSON z listy węzłów
 function buildGeoJSONPath(path, nodes) {
   const coords = path.map(id => {
     const n = nodes.get(parseInt(id));
@@ -105,7 +105,7 @@ function buildGeoJSONPath(path, nodes) {
   };
 }
 
-// 🔹 Główna funkcja
+//Główna funkcja
 async function main() {
   try {
     console.log('Pobieram dane z Overpass API...');
@@ -127,7 +127,7 @@ async function main() {
     const { nodes, graph } = buildGraphForDijkstra(osmData);
     console.log(`Węzłów: ${nodes.size}, Połączeń: ${Object.keys(graph).length}`);
 
-    // 🔹 Punkty start/meta (możesz zmienić)
+    //Punkty start/meta
     const startLat = 53.01379;
     const startLon = 18.60413;
 
@@ -145,14 +145,14 @@ async function main() {
       return;
     }
 
-    // 🔹 Sprawdzenie, czy w ogóle istnieje połączenie
+    //Sprawdzenie, czy w ogóle istnieje połączenie
     console.log('Sprawdzam, czy węzły są połączone...');
     if (!areConnected(graph, String(startNode), String(endNode))) {
       console.log('Start i meta nie są połączone w grafie (inne komponenty).');
       return;
     }
 
-    // 🔹 Używamy Dijkstry
+    //Używanie Dijkstry
     console.log('Szukam najkrótszej trasy...');
     const pathNodes = dijkstra.find_path(graph, String(startNode), String(endNode));
 
