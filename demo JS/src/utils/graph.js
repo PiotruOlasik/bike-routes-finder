@@ -52,19 +52,77 @@ export function findNearestNode(lat, lon, nodes) {
   return nearestId;
 }
 
+// POPRAWIONA funkcja sprawdzająca połączenia
 export function areConnected(graph, start, end) {
+  // Sprawdź czy węzły istnieją w grafie
+  if (!graph[start] || !graph[end]) {
+    console.log(`Węzeł ${!graph[start] ? start : end} nie istnieje w grafie`);
+    return false;
+  }
+
   const visited = new Set();
   const queue = [start];
+  visited.add(start);
+  
+  let iterations = 0;
+  const maxIterations = 100000; // Zabezpieczenie przed nieskończoną pętlą
 
-  while (queue.length > 0) {
+  while (queue.length > 0 && iterations < maxIterations) {
+    iterations++;
     const node = queue.shift();
-    if (node === end) return true;
+    
+    if (node === end) {
+      console.log(`Połączenie znalezione po ${iterations} iteracjach`);
+      return true;
+    }
 
-    visited.add(node);
-
-    for (const neighbor in graph[node] || {}) {
-      if (!visited.has(neighbor)) queue.push(neighbor);
+    const neighbors = graph[node];
+    if (neighbors) {
+      for (const neighbor in neighbors) {
+        if (!visited.has(neighbor)) {
+          visited.add(neighbor);
+          queue.push(neighbor);
+        }
+      }
+    }
+    
+    // Progress info co 10000 iteracji
+    if (iterations % 10000 === 0) {
+      console.log(`Sprawdzono ${iterations} węzłów, odwiedzono ${visited.size}, kolejka: ${queue.length}`);
     }
   }
+  
+  console.log(`Nie znaleziono połączenia po ${iterations} iteracjach (odwiedzono ${visited.size} węzłów)`);
   return false;
+}
+
+// DODATKOWA funkcja - znajdź składowe spójne
+export function findConnectedComponents(graph) {
+  const visited = new Set();
+  const components = [];
+  
+  for (const node in graph) {
+    if (!visited.has(node)) {
+      const component = new Set();
+      const queue = [node];
+      
+      while (queue.length > 0) {
+        const current = queue.shift();
+        if (visited.has(current)) continue;
+        
+        visited.add(current);
+        component.add(current);
+        
+        for (const neighbor in graph[current] || {}) {
+          if (!visited.has(neighbor)) {
+            queue.push(neighbor);
+          }
+        }
+      }
+      
+      components.push(component);
+    }
+  }
+  
+  return components;
 }
