@@ -4,7 +4,7 @@
     {
       "type": "Feature",
       "properties": {
-        "distance_km": 0.000010461635285310975
+        "distance_km": 0.8103204031569144
       },
       "geometry": {
         "type": "LineString",

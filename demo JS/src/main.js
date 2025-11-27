@@ -6,6 +6,7 @@ import path from 'path';
 import { overpassUrl, query } from './query.js';
 import { buildGraphForDijkstra, findNearestNode, areConnected } from './utils/graph.js';
 import { buildGeoJSONPath } from './utils/geojson.js';
+import { haversineDistance } from './utils/haversine.js';
 
 async function main() {
   try {
@@ -64,10 +65,7 @@ async function main() {
     for (let i = 0; i < pathNodes.length - 1; i++) {
       const a = nodes.get(parseInt(pathNodes[i]));
       const b = nodes.get(parseInt(pathNodes[i + 1]));
-      totalDistance +=
-        Math.sqrt(
-          (a.lat - b.lat) ** 2 + (a.lon - b.lon) ** 2
-        ); // możesz zostawić haversine jeśli wolisz
+      totalDistance += haversineDistance(a.lat, a.lon, b.lat, b.lon);
     }
 
     console.log(`Długość trasy: ${(totalDistance / 1000).toFixed(3)} km`);
