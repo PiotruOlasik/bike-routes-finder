@@ -23,13 +23,13 @@ struct Edge {
     double weight;
 };
 
-// Bufor do przechwytywania odpowiedzi curl
+//Bufor do przechwytywania odpowiedzi curl
 static size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
     ((std::string*)userp)->append((char*)contents, size * nmemb);
     return size * nmemb;
 }
 
-// Funkcja do pobierania danych przez HTTP POST (Overpass API)
+//Funkcja do pobierania danych przez HTTP POST (Overpass API)
 std::string fetchOverpassData(const std::string& query) {
     curl_global_init(CURL_GLOBAL_DEFAULT);
     CURL* curl = curl_easy_init();
@@ -70,12 +70,12 @@ std::string fetchOverpassData(const std::string& query) {
 }
 
 
-// Obliczanie odległości euklidesowej (na potrzeby grafu; wartości w stopniach)
+//Obliczanie odległości euklidesowej (na potrzeby grafu; wartości w stopniach)
 double distance(double lat1, double lon1, double lat2, double lon2) {
     return std::sqrt((lat1 - lat2) * (lat1 - lat2) + (lon1 - lon2) * (lon1 - lon2));
 }
 
-// Znajdź najbliższy węzeł
+//Znajdź najbliższy węzeł
 int64 findNearestNode(double lat, double lon, const std::unordered_map<int64, Node>& nodes) {
     int64 nearestId = -1;
     double minDist = 1e18;
@@ -91,7 +91,7 @@ int64 findNearestNode(double lat, double lon, const std::unordered_map<int64, No
     return nearestId;
 }
 
-// Algorytm Dijkstry 
+//Algorytm Dijkstry 
 std::vector<int64> dijkstra(const std::unordered_map<int64, std::vector<Edge>>& graph, int64 start, int64 end) {
     std::unordered_map<int64, double> dist;
     std::unordered_map<int64, int64> prev;
@@ -144,7 +144,7 @@ std::vector<int64> dijkstra(const std::unordered_map<int64, std::vector<Edge>>& 
     return path;
 }
 
-// Budowanie GeoJSON z trasy
+//Budowanie GeoJSON z trasy
 json buildGeoJSONPath(const std::vector<int64>& path, const std::unordered_map<int64, Node>& nodes) {
     json coords = json::array();
     for (int64 id : path) {
@@ -172,7 +172,7 @@ json buildGeoJSONPath(const std::vector<int64>& path, const std::unordered_map<i
 }
 
 int main() {
-    // Zapytanie Overpass API z bounding boxem dla Torunia
+    //Zapytanie Overpass API z bounding boxem dla Torunia
     std::string query = R"(
 [out:json][timeout:25];
 (
@@ -190,13 +190,13 @@ out skel qt;
         return 1;
     }
 
-    // Zapis surowych danych (opcjonalne)
+    //Zapis surowych danych (opcjonalne)
     {
         std::ofstream rawFile("osm_raw.json");
         rawFile << data;
     }
 
-    // Parsowanie JSON (bezpiecznie)
+    //Parsowanie JSON (bezpiecznie)
     json osmData;
     try {
         osmData = json::parse(data);
@@ -206,7 +206,7 @@ out skel qt;
         return 1;
     }
 
-    // Wypisywanie cech  dróg
+    //Wypisywanie cech  dróg
     std::cout << "Wypisywanie cech (tagów) dróg:\n";
     for (const auto& el : osmData["elements"]) {
         if (el.contains("type") && el["type"].is_string() && el["type"] == "way") {
@@ -225,7 +225,7 @@ out skel qt;
         }
     }
 
-    // Mapowanie węzłów
+    //Mapowanie węzłów
     std::unordered_map<int64, Node> nodes;
     if (osmData.contains("elements") && osmData["elements"].is_array()) {
         for (const auto& el : osmData["elements"]) {
@@ -244,7 +244,7 @@ out skel qt;
         return 1;
     }
 
-    // Budowa grafu
+    //Budowa grafu
     std::unordered_map<int64, std::vector<Edge>> graph;
     for (const auto& el : osmData["elements"]) {
         if (el.contains("type") && el["type"].is_string() && el["type"] == "way") {
@@ -266,7 +266,7 @@ out skel qt;
 
     std::cout << "Węzłów: " << nodes.size() << ", Węzłów w grafie (z krawędziami): " << graph.size() << "\n";
 
-    // Punkty start i meta (przykład)
+    //Punkty start i meta (przykład)
     double startLat = 53.01379;
     double startLon = 18.60413;
     double endLat = 53.01147;
