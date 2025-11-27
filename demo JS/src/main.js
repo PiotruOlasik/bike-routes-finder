@@ -4,7 +4,7 @@ import dijkstra from 'dijkstrajs';
 import path from 'path';
 
 import { overpassUrl, query } from './query.js';
-import { buildGraphForDijkstra, findNearestNode, areConnected } from './utils/graph.js';
+import { buildGraphForDijkstra, findNearestNode, areConnected, findConnectedComponents } from './utils/graph.js';
 import { buildGeoJSONPath } from './utils/geojson.js';
 import { haversineDistance } from './utils/haversine.js';
 
@@ -26,12 +26,12 @@ async function main() {
 
     const { nodes, graph } = buildGraphForDijkstra(osmData);
     console.log(`Węzłów: ${nodes.size}, Połączeń: ${Object.keys(graph).length}`);
- 
-    const startLat = 51.466908035856164;
-    const startLon = 19.58540236462733;
 
-    const endLat = 51.39400910876485;
-    const endLon = 19.579669884936582;
+    const startLat =   51.46681902975696;
+    const startLon = 19.571030370525943;
+
+    const endLat = 51.46722369065393;
+    const endLon =  19.601921146542217;
 
     const startNode = findNearestNode(startLat, startLon, nodes);
     const endNode = findNearestNode(endLat, endLon, nodes);
@@ -44,14 +44,49 @@ async function main() {
       return;
     }
 
-    console.log('Sprawdzam połączenia...');
-    if (!areConnected(graph, String(startNode), String(endNode))) {
-      console.log('Węzły nie są połączone w grafie.');
+    // Sprawdź czy węzły są w grafie
+    const startKey = String(startNode);
+    const endKey = String(endNode);
+    console.log(`Węzeł startowy ma ${Object.keys(graph[startKey] || {}).length} połączeń`);
+    console.log(`Węzeł końcowy ma ${Object.keys(graph[endKey] || {}).length} połączeń`);
+
+    // Analiza składowych spójnych (opcjonalnie - może trwać długo dla dużych grafów)
+    console.log('\nAnaliza składowych spójnych...');
+    const components = findConnectedComponents(graph);
+    console.log(`Graf ma ${components.length} składowych spójnych`);
+    
+    // Znajdź w której składowej są nasze węzły
+    let startComponent = -1;
+    let endComponent = -1;
+    
+    for (let i = 0; i < components.length; i++) {
+      if (components[i].has(startKey)) startComponent = i;
+      if (components[i].has(endKey)) endComponent = i;
+    }
+    
+    console.log(`Węzeł startowy jest w składowej ${startComponent} (rozmiar: ${components[startComponent]?.size || 0})`);
+    console.log(`Węzeł końcowy jest w składowej ${endComponent} (rozmiar: ${components[endComponent]?.size || 0})`);
+
+    if (startComponent !== endComponent) {
+      console.log('\n⚠️  PROBLEM: Węzły są w różnych składowych spójnych!');
+      console.log('To oznacza, że drogi nie są połączone w danych OSM.');
+      console.log('Możliwe przyczyny:');
+      console.log('1. Zbyt restrykcyjne filtry w zapytaniu Overpass');
+      console.log('2. Fizyczna przerwa w infrastrukturze rowerowej');
+      console.log('3. Niewystarczający obszar zapytania');
+      return;
+    }
+
+    console.log('\nWęzły są w tej samej składowej spójnej');
+    console.log('Sprawdzam połączenia szczegółowo...');
+    
+    if (!areConnected(graph, startKey, endKey)) {
+      console.log('Węzły nie są połączone w grafie (sprawdzenie awaryjne).');
       return;
     }
 
     console.log('Obliczam trasę...');
-    const pathNodes = dijkstra.find_path(graph, String(startNode), String(endNode));
+    const pathNodes = dijkstra.find_path(graph, startKey, endKey);
 
     if (!pathNodes || pathNodes.length === 0) {
       console.log('Nie znaleziono trasy.');
