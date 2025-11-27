@@ -26,12 +26,12 @@ async function main() {
 
     const { nodes, graph } = buildGraphForDijkstra(osmData);
     console.log(`Węzłów: ${nodes.size}, Połączeń: ${Object.keys(graph).length}`);
+ 
+    const startLat = 51.466908035856164;
+    const startLon = 19.58540236462733;
 
-    const startLat = 53.01379;
-    const startLon = 18.60413;
-
-    const endLat = 53.01147;
-    const endLon = 18.61330;
+    const endLat = 51.39400910876485;
+    const endLon = 19.579669884936582;
 
     const startNode = findNearestNode(startLat, startLon, nodes);
     const endNode = findNearestNode(endLat, endLon, nodes);
