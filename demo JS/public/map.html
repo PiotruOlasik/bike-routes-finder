@@ -2,57 +2,477 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
-  <title>Prosta trasa rowerowa</title>
+  <title>Trasa rowerowa z analizą nawierzchni</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
   />
   <style>
-    #map { height: 90vh; width: 100%; }
-    body { margin: 0; font-family: Arial, sans-serif; }
-    h2 { padding: 10px; margin: 0; background: #f2f2f2; border-bottom: 1px solid #ccc; }
+    * {
+      box-sizing: border-box;
+    }
+    
+    body { 
+      margin: 0; 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: #f5f5f5;
+    }
+    
+    #map { 
+      height: 65vh; 
+      width: 100%; 
+    }
+    
+    .header {
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .header h1 {
+      margin: 0 0 15px 0;
+      font-size: 28px;
+      font-weight: 600;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    
+    .stat-card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 12px 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      opacity: 0.9;
+      margin-bottom: 5px;
+    }
+    
+    .stat-value {
+      font-size: 20px;
+      font-weight: 600;
+    }
+    
+    .info-panel {
+      padding: 20px;
+      background: white;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .info-section {
+      margin-bottom: 15px;
+    }
+    
+    .info-section:last-child {
+      margin-bottom: 0;
+    }
+    
+    .info-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .surface-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .surface-tag {
+      background: #e9ecef;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .surface-tag.unknown {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+    
+    .surface-tag.not-allowed {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .surface-tag.allowed {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .surface-count {
+      background: rgba(0, 0, 0, 0.1);
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+    }
+    
+    .evaluation {
+      padding: 15px;
+      border-radius: 8px;
+      font-weight: 600;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    
+    .evaluation-icon {
+      font-size: 24px;
+    }
+    
+    .evaluation-content {
+      flex: 1;
+    }
+    
+    .evaluation-message {
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+    
+    .evaluation-details {
+      font-size: 13px;
+      font-weight: 400;
+      opacity: 0.9;
+      margin-top: 8px;
+    }
+    
+    .evaluation.success {
+      background: #d4edda;
+      color: #155724;
+      border: 2px solid #c3e6cb;
+    }
+    
+    .evaluation.warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 2px solid #ffeaa7;
+    }
+    
+    .evaluation.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 2px solid #f5c6cb;
+    }
+    
+    .legend {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    }
+    
+    .legend-title {
+      font-weight: 600;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #333;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 8px 0;
+      font-size: 13px;
+    }
+    
+    .legend-color {
+      width: 30px;
+      height: 4px;
+      border-radius: 2px;
+    }
+    
+    .error-message {
+      padding: 20px;
+      background: #f8d7da;
+      color: #721c24;
+      border-left: 4px solid #dc3545;
+      margin: 20px;
+      border-radius: 4px;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      font-size: 18px;
+      color: #666;
+    }
+    
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 22px;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      
+      .stat-value {
+        font-size: 18px;
+      }
+    }
   </style>
 </head>
 <body>
-  <h2 id="title">Prosta trasa rowerowa</h2>
+  <div class="header">
+    <h1 id="title">🚴 Ładowanie trasy...</h1>
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">📏 Długość trasy</div>
+        <div class="stat-value" id="distance">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">🚲 Typ roweru</div>
+        <div class="stat-value" id="bike-type">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">🛣️ Liczba segmentów</div>
+        <div class="stat-value" id="segments">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">🗺️ Punkty trasy</div>
+        <div class="stat-value" id="nodes">-</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-panel">
+    <div class="info-section">
+      <div class="info-title">
+        <span>🛣️</span>
+        <span>Nawierzchnie na trasie</span>
+      </div>
+      <div class="surface-list" id="surfaces">
+        <div class="loading">Ładowanie...</div>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <div class="evaluation" id="evaluation" style="display: none;">
+        <div class="evaluation-icon" id="evaluation-icon">⏳</div>
+        <div class="evaluation-content">
+          <div class="evaluation-message" id="evaluation-message">Ocena trasy...</div>
+          <div class="evaluation-details" id="evaluation-details"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     // Inicjalizacja mapy
-    const map = L.map('map').setView([53.01, 18.60], 13);
+    const map = L.map('map').setView([51.467, 19.586], 13);
 
     // Warstwa OSM
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
+
+    // Kolory dla statusów
+    const statusColors = {
+      success: '#28a745',
+      warning: '#ffc107',
+      error: '#dc3545'
+    };
+
+    const statusIcons = {
+      success: '✅',
+      warning: '⚠️',
+      error: '❌'
+    };
 
     // Wczytywanie trasy
     fetch('route_cycleway.geojson')
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then(data => {
+        const props = data.features[0].properties;
+        const coords = data.features[0].geometry.coordinates;
+        
+        // Określ kolor trasy na podstawie oceny
+        let routeColor = '#0066ff';
+        if (props.evaluation) {
+          routeColor = statusColors[props.evaluation.status] || routeColor;
+        }
+
         // Rysowanie trasy na mapie
         const routeLayer = L.geoJSON(data, {
-          style: { color: 'blue', weight: 5 }
+          style: { 
+            color: routeColor, 
+            weight: 6,
+            opacity: 0.8,
+            lineJoin: 'round',
+            lineCap: 'round'
+          }
         }).addTo(map);
 
+        // Dodaj markery start/koniec
+        const startCoord = coords[0];
+        const endCoord = coords[coords.length - 1];
+        
+        L.marker([startCoord[1], startCoord[0]], {
+          icon: L.divIcon({
+            html: '<div style="background: #28a745; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">S</div>',
+            className: '',
+            iconSize: [30, 30]
+          })
+        }).addTo(map).bindPopup('🚩 Start');
+        
+        L.marker([endCoord[1], endCoord[0]], {
+          icon: L.divIcon({
+            html: '<div style="background: #dc3545; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">M</div>',
+            className: '',
+            iconSize: [30, 30]
+          })
+        }).addTo(map).bindPopup('🏁 Meta');
+
         // Dopasowanie mapy do trasy
-        map.fitBounds(routeLayer.getBounds());
+        map.fitBounds(routeLayer.getBounds(), { padding: [50, 50] });
 
-        // Pobranie dystansu z pliku GeoJSON
-        const distanceKm = data.features[0].properties.distance_km;
+        // Aktualizacja interfejsu
+        const distanceKm = props.distance_km;
+        document.getElementById('title').textContent = `🚴 Trasa rowerowa`;
+        document.getElementById('distance').textContent = distanceKm.toFixed(2) + ' km';
+        document.getElementById('bike-type').textContent = props.bike_type || 'Nieokreślony';
+        document.getElementById('segments').textContent = props.segments_count || '-';
+        document.getElementById('nodes').textContent = coords.length || '-';
 
-        // Ustawienie tytułu z dystansem
-        document.getElementById('title').textContent =
-          "Prosta trasa rowerowa Toruń – " + distanceKm.toFixed(2) + " km";
+        // Wyświetl nawierzchnie z liczbą wystąpień
+        const surfacesContainer = document.getElementById('surfaces');
+        surfacesContainer.innerHTML = '';
+        
+        if (props.surface_statistics) {
+          const sortedSurfaces = Object.entries(props.surface_statistics)
+            .sort((a, b) => b[1] - a[1]); // Sortuj od najczęstszej
+          
+          sortedSurfaces.forEach(([surface, count]) => {
+            const tag = document.createElement('div');
+            tag.className = 'surface-tag';
+            
+            // Określ klasę na podstawie typu nawierzchni
+            if (surface === 'unknown') {
+              tag.classList.add('unknown');
+            } else if (props.evaluation && props.evaluation.not_allowed_surfaces && 
+                       props.evaluation.not_allowed_surfaces.includes(surface)) {
+              tag.classList.add('not-allowed');
+            } else {
+              tag.classList.add('allowed');
+            }
+            
+            tag.innerHTML = `
+              <span>${surface}</span>
+              <span class="surface-count">${count}</span>
+            `;
+            surfacesContainer.appendChild(tag);
+          });
+        } else if (props.unique_surfaces && props.unique_surfaces.length > 0) {
+          props.unique_surfaces.forEach(surface => {
+            const tag = document.createElement('div');
+            tag.className = 'surface-tag';
+            if (surface === 'unknown') tag.classList.add('unknown');
+            tag.textContent = surface;
+            surfacesContainer.appendChild(tag);
+          });
+        } else {
+          surfacesContainer.innerHTML = '<span style="color: #999;">Brak danych o nawierzchni</span>';
+        }
+
+        // Wyświetl ocenę
+        const evaluationDiv = document.getElementById('evaluation');
+        const evaluationIcon = document.getElementById('evaluation-icon');
+        const evaluationMessage = document.getElementById('evaluation-message');
+        const evaluationDetails = document.getElementById('evaluation-details');
+        
+        if (props.evaluation) {
+          evaluationDiv.style.display = 'flex';
+          evaluationDiv.className = 'evaluation ' + props.evaluation.status;
+          evaluationIcon.textContent = statusIcons[props.evaluation.status];
+          evaluationMessage.textContent = props.evaluation.message;
+          
+          let detailsHTML = '';
+          
+          if (props.evaluation.not_allowed_surfaces && 
+              props.evaluation.not_allowed_surfaces.length > 0) {
+            detailsHTML += `<div>❌ Niedozwolone nawierzchnie: ${props.evaluation.not_allowed_surfaces.join(', ')}</div>`;
+          }
+          
+          if (props.evaluation.unknown_segments !== undefined) {
+            const percentage = ((props.evaluation.unknown_segments / props.evaluation.total_segments) * 100).toFixed(1);
+            detailsHTML += `<div>⚠️ Segmentów z nieznaną nawierzchnią: ${props.evaluation.unknown_segments}/${props.evaluation.total_segments} (${percentage}%)</div>`;
+          }
+          
+          evaluationDetails.innerHTML = detailsHTML;
+        }
+
+        // Dodaj legendę
+        const legend = L.control({ position: 'bottomright' });
+        legend.onAdd = function(map) {
+          const div = L.DomUtil.create('div', 'legend');
+          div.innerHTML = `
+            <div class="legend-title">Legenda</div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: ${statusColors.success};"></div>
+              <span>✅ Trasa odpowiednia</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: ${statusColors.warning};"></div>
+              <span>⚠️ Brak pełnych danych</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color" style="background: ${statusColors.error};"></div>
+              <span>❌ Trasa nieodpowiednia</span>
+            </div>
+          `;
+          return div;
+        };
+        legend.addTo(map);
+
       })
       .catch(err => {
         console.error('Błąd wczytywania GeoJSON:', err);
-        document.getElementById('title').textContent =
-          "Błąd ładowania trasy!";
+        document.getElementById('title').textContent = "❌ Błąd ładowania trasy";
+        
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.innerHTML = `
+          <strong>Nie można załadować danych trasy</strong><br>
+          <small>Szczegóły: ${err.message}</small><br>
+          <small style="margin-top: 10px; display: block;">
+            💡 Upewnij się, że plik <code>route_cycleway.geojson</code> istnieje w katalogu <code>public/</code>
+          </small>
+        `;
+        
+        document.querySelector('.info-panel').innerHTML = '';
+        document.querySelector('.info-panel').appendChild(errorDiv);
       });
   </script>
 </body>
