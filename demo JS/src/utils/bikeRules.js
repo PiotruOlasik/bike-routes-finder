@@ -34,7 +34,7 @@ export function evaluateRoute(surfaces, bikeType) {
     return {
       suitable: null,
       status: 'warning',
-      message: '⚠️ Trasa może być nieodpowiednia. Brak danych o nawierzchni.',
+      message: 'Trasa może być nieodpowiednia. Brak danych o nawierzchni.',
       unknownSurfaces: surfaces.filter(s => s === 'unknown').length,
       totalSegments: surfaces.length
     };
@@ -48,7 +48,7 @@ export function evaluateRoute(surfaces, bikeType) {
     return {
       suitable: false,
       status: 'error',
-      message: `❌ Trasa NIE jest odpowiednia dla roweru typu: ${bikeType}`,
+      message: `Trasa NIE jest odpowiednia dla roweru typu: ${bikeType}`,
       notAllowedSurfaces: notAllowed,
       allSurfaces: Array.from(uniqueSurfaces)
     };
@@ -57,7 +57,7 @@ export function evaluateRoute(surfaces, bikeType) {
   return {
     suitable: true,
     status: 'success',
-    message: `✅ Trasa jest odpowiednia dla roweru typu: ${bikeType}`,
+    message: `Trasa jest odpowiednia dla roweru typu: ${bikeType}`,
     allSurfaces: Array.from(uniqueSurfaces)
   };
 }
