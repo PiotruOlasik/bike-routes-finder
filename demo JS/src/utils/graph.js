@@ -65,7 +65,7 @@ export function buildGraphForDijkstra(osmData) {
 }
 
 /**
- * NOWA funkcja wydobywająca metadane dla całej trasy
+ * funkcja wydobywająca metadane dla całej trasy
  * @param {Array} pathNodes - Tablica ID węzłów trasy
  * @param {Map} wayMetadata - Mapa metadanych krawędzi
  * @returns {Object} { surfaces, highways, segments }

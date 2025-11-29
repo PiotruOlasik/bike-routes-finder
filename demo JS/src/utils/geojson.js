@@ -144,7 +144,7 @@ export function buildDetailedGeoJSON(path, nodes, routeMetadata, totalDistance, 
 }
 
 /**
- * DODATKOWA funkcja pomocnicza - tworzy uproszczony GeoJSON tylko z punktami start/koniec
+ * funkcja pomocnicza - tworzy uproszczony GeoJSON tylko z punktami start/koniec
  * @param {Array} path - Tablica ID węzłów trasy
  * @param {Map} nodes - Mapa węzłów z współrzędnymi
  * @returns {Object} GeoJSON FeatureCollection z punktami

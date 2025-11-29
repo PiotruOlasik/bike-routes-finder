@@ -20,7 +20,7 @@ import { evaluateRoute, bikeTypes } from './utils/bikeRules.js';
  * Zapisuje GeoJSON do GitHub Gist i otwiera w geojson.io
  */
 async function openInGeojsonIO(geojsonData) {
-  console.log('\n🌐 Przygotowuję trasę do wyświetlenia w geojson.io...');
+  console.log('\nPrzygotowuję trasę do wyświetlenia w geojson.io...');
   
   try {
     // Utwórz anonimowy Gist
@@ -53,38 +53,34 @@ async function openInGeojsonIO(geojsonData) {
     // Utwórz URL do geojson.io z linkiem do Gist
     const geojsonIOUrl = `https://geojson.io/#id=gist:anonymous/${gistId}`;
     
-    console.log('   ✅ GeoJSON zapisany jako GitHub Gist');
-    console.log(`   🔗 Gist ID: ${gistId}`);
-    console.log(`   📄 Raw URL: ${rawUrl}`);
-    console.log('\n   ╔════════════════════════════════════════════════════════╗');
-    console.log('   ║  🌐 OTWÓRZ TRASĘ W PRZEGLĄDARCE                       ║');
-    console.log('   ╚════════════════════════════════════════════════════════╝');
-    console.log(`\n   🔗 Kliknij lub skopiuj link:`);
-    console.log(`   \x1b[36m${geojsonIOUrl}\x1b[0m\n`);
+    console.log('    GeoJSON zapisany jako GitHub Gist');
+    console.log(`    Gist ID: ${gistId}`);
+    console.log(`    Raw URL: ${rawUrl}`);
+
     
-    // Próba otwarcia w przeglądarce (może nie działać w VS Code)
+    // Próba otwarcia w przeglądarce
     const command = process.platform === 'win32' ? 'start ""' :
                     process.platform === 'darwin' ? 'open' : 'xdg-open';
     
     exec(`${command} "${geojsonIOUrl}"`, (error) => {
       if (error) {
-        console.log('   💡 INSTRUKCJA:');
-        console.log('   • Ctrl+Click (Windows/Linux) lub Cmd+Click (Mac) na link powyżej');
-        console.log('   • Lub skopiuj link i wklej w przeglądarce\n');
+        console.log('   INSTRUKCJA:');
+        console.log('   Ctrl+Click (Windows/Linux) lub Cmd+Click (Mac) na link powyżej');
+        console.log('   Lub skopiuj link i wklej w przeglądarce\n');
       }
     });
 
   } catch (error) {
-    console.log('   ⚠️  Nie udało się użyć GitHub Gist API');
-    console.log(`   ℹ️  Szczegóły: ${error.message}`);
-    console.log('   💡 Alternatywne rozwiązanie: Zapisuję do pliku lokalnego\n');
+    console.log('   Nie udało się użyć GitHub Gist API');
+    console.log(`   ℹSzczegóły: ${error.message}`);
+    console.log('   Alternatywne rozwiązanie: Zapisuję do pliku lokalnego\n');
     
     // Fallback - zapisz lokalnie i pokaż instrukcję
     const outputPath = path.join(process.cwd(), 'route_for_geojson_io.geojson');
     fs.writeFileSync(outputPath, JSON.stringify(geojsonData, null, 2));
-    console.log(`   ✅ Zapisano do: ${outputPath}`);
+    console.log(`   Zapisano do: ${outputPath}`);
     console.log('\n   ╔════════════════════════════════════════════════════════╗');
-    console.log('   ║  📖 JAK WYŚWIETLIĆ TRASĘ W GEOJSON.IO                 ║');
+    console.log('   ║    JAK WYŚWIETLIĆ TRASĘ W GEOJSON.IO                 ║');
     console.log('   ╚════════════════════════════════════════════════════════╝\n');
     console.log('   Metoda 1 (zalecana):');
     console.log('   1. Otwórz \x1b[36mhttps://geojson.io\x1b[0m');
@@ -98,14 +94,13 @@ async function openInGeojsonIO(geojsonData) {
 
 async function main() {
   try {
-    // ============================================
-    // KONFIGURACJA - ZMIEŃ TUTAJ
-    // ============================================
+
+    // KONFIGURACJA 
     const bikeType = 'szosowy'; // Opcje: 'miejski', 'trekkingowy', 'górski', 'szosowy'
     const saveToFile = true; // Czy dodatkowo zapisać do pliku
     const openInBrowser = true; // Czy otworzyć w geojson.io
     
-    // Współrzędne start i meta - ZMIEŃ NA SWOJE
+    // Współrzędne start i meta
     const startLat = 51.46681902975696;
     const startLon = 19.571030370525943;
     const endLat = 51.46722369065393;
@@ -119,10 +114,8 @@ async function main() {
     console.log(`Meta:  ${endLat}, ${endLon}`);
     console.log(`${'='.repeat(60)}\n`);
 
-    // ============================================
     // KROK 1: Pobierz dane z Overpass API
-    // ============================================
-    console.log('📡 KROK 1: Pobieram dane z Overpass API...');
+    console.log(' KROK 1: Pobieram dane z Overpass API...');
     const response = await fetch(overpassUrl, {
       method: 'POST',
       body: query,
@@ -134,42 +127,36 @@ async function main() {
     }
 
     const osmData = await response.json();
-    console.log('   ✅ Dane OSM pobrane pomyślnie');
-    console.log(`   📊 Elementów: ${osmData.elements.length}\n`);
+    console.log('    Dane OSM pobrane pomyślnie');
+    console.log(`    Elementów: ${osmData.elements.length}\n`);
 
-    // ============================================
     // KROK 2: Buduj graf z metadanymi
-    // ============================================
-    console.log('🔨 KROK 2: Buduję graf z metadanymi...');
+    console.log(' KROK 2: Buduję graf z metadanymi...');
     const { nodes, graph, wayMetadata } = buildGraphForDijkstra(osmData);
-    console.log(`   ✅ Graf zbudowany`);
-    console.log(`   🔵 Węzłów: ${nodes.size}`);
-    console.log(`   🔗 Krawędzi: ${Object.keys(graph).length}\n`);
+    console.log(`    Graf zbudowany`);
+    console.log(`    Węzłów: ${nodes.size}`);
+    console.log(`    Krawędzi: ${Object.keys(graph).length}\n`);
 
-    // ============================================
     // KROK 3: Znajdź najbliższe węzły
-    // ============================================
     console.log('🎯 KROK 3: Szukam najbliższych węzłów...');
     const startNode = findNearestNode(startLat, startLon, nodes);
     const endNode = findNearestNode(endLat, endLon, nodes);
 
     if (!startNode || !endNode) {
-      console.log('   ❌ Nie znaleziono węzłów start/meta.');
+      console.log('    Nie znaleziono węzłów start/meta.');
       return;
     }
 
-    console.log(`   ✅ Węzeł startowy: ${startNode}`);
-    console.log(`   ✅ Węzeł końcowy: ${endNode}\n`);
+    console.log(`    Węzeł startowy: ${startNode}`);
+    console.log(`    Węzeł końcowy: ${endNode}\n`);
 
-    // ============================================
     // KROK 4: Sprawdź składowe spójne
-    // ============================================
     const startKey = String(startNode);
     const endKey = String(endNode);
     
-    console.log('🧩 KROK 4: Analiza składowych spójnych...');
+    console.log(' KROK 4: Analiza składowych spójnych...');
     const components = findConnectedComponents(graph);
-    console.log(`   📊 Graf ma ${components.length} składowych spójnych`);
+    console.log(`    Graf ma ${components.length} składowych spójnych`);
     
     let startComponent = -1;
     let endComponent = -1;
@@ -180,30 +167,26 @@ async function main() {
     }
 
     if (startComponent !== endComponent) {
-      console.log('\n   ❌ Węzły są w różnych składowych spójnych!');
+      console.log('\n    Węzły są w różnych składowych spójnych!');
       return;
     }
 
-    console.log('   ✅ Węzły są w tej samej składowej spójnej\n');
+    console.log('    Węzły są w tej samej składowej spójnej\n');
 
-    // ============================================
     // KROK 5: Oblicz trasę (Dijkstra)
-    // ============================================
-    console.log('🗺️  KROK 5: Obliczam najkrótszą trasę...');
+    console.log('  KROK 5: Obliczam najkrótszą trasę...');
     const pathNodes = dijkstra.find_path(graph, startKey, endKey);
 
     if (!pathNodes || pathNodes.length === 0) {
-      console.log('   ❌ Nie znaleziono trasy.');
+      console.log('    Nie znaleziono trasy.');
       return;
     }
 
-    console.log(`   ✅ Znaleziono trasę!`);
-    console.log(`   📊 Trasa zawiera ${pathNodes.length} węzłów\n`);
+    console.log(`    Znaleziono trasę!`);
+    console.log(`    Trasa zawiera ${pathNodes.length} węzłów\n`);
 
-    // ============================================
     // KROK 6: Oblicz długość trasy
-    // ============================================
-    console.log('📏 KROK 6: Obliczam długość trasy...');
+    console.log(' KROK 6: Obliczam długość trasy...');
     let totalDistance = 0;
     for (let i = 0; i < pathNodes.length - 1; i++) {
       const a = nodes.get(parseInt(pathNodes[i]));
@@ -211,27 +194,21 @@ async function main() {
       totalDistance += haversineDistance(a.lat, a.lon, b.lat, b.lon);
     }
 
-    console.log(`   ✅ Długość trasy: ${(totalDistance / 1000).toFixed(3)} km\n`);
+    console.log(`    Długość trasy: ${(totalDistance / 1000).toFixed(3)} km\n`);
 
-    // ============================================
     // KROK 7: Wydobądź metadane trasy
-    // ============================================
-    console.log('🔍 KROK 7: Analizuję nawierzchnię...');
+    console.log(' KROK 7: Analizuję nawierzchnię...');
     const routeMetadata = extractRouteMetadata(pathNodes, wayMetadata);
     
     const uniqueSurfaces = [...new Set(routeMetadata.surfaces)];
-    console.log(`   📋 Nawierzchnie: ${uniqueSurfaces.join(', ')}\n`);
+    console.log(`    Nawierzchnie: ${uniqueSurfaces.join(', ')}\n`);
 
-    // ============================================
     // KROK 8: Oceń trasę
-    // ============================================
-    console.log('⚖️  KROK 8: Oceniam trasę...');
+    console.log('  KROK 8: Oceniam trasę...');
     const evaluation = evaluateRoute(routeMetadata.surfaces, bikeType);
     console.log(`   ${evaluation.message}\n`);
 
-    // ============================================
     // KROK 9: Przygotuj GeoJSON
-    // ============================================
     console.log('📦 KROK 9: Przygotowuję GeoJSON...');
     const routeGeoJSON = buildGeoJSONPath(
       pathNodes, 
@@ -249,28 +226,24 @@ async function main() {
       console.log('   ✅ Zapisano do route_output.geojson');
     }
 
-    // ============================================
     // KROK 10: Otwórz w geojson.io
-    // ============================================
     if (openInBrowser) {
       openInGeojsonIO(routeGeoJSON);
     }
 
-    // ============================================
     // PODSUMOWANIE
-    // ============================================
     console.log(`\n${'='.repeat(60)}`);
-    console.log('✨ GOTOWE! Podsumowanie:');
+    console.log(' GOTOWE! Podsumowanie:');
     console.log(`${'='.repeat(60)}`);
-    console.log(`🚲 Typ roweru:        ${bikeType}`);
-    console.log(`📏 Długość trasy:     ${(totalDistance / 1000).toFixed(3)} km`);
-    console.log(`🔵 Węzłów na trasie:  ${pathNodes.length}`);
-    console.log(`🛣️  Nawierzchnie:      ${uniqueSurfaces.join(', ')}`);
+    console.log(` Typ roweru:        ${bikeType}`);
+    console.log(` Długość trasy:     ${(totalDistance / 1000).toFixed(3)} km`);
+    console.log(` Węzłów na trasie:  ${pathNodes.length}`);
+    console.log(`  Nawierzchnie:      ${uniqueSurfaces.join(', ')}`);
     console.log(`${evaluation.status === 'success' ? '✅' : evaluation.status === 'warning' ? '⚠️' : '❌'} Status:            ${evaluation.status.toUpperCase()}`);
     console.log(`${'='.repeat(60)}\n`);
 
   } catch (err) {
-    console.error('\n❌ BŁĄD:', err.message);
+    console.error('\n BŁĄD:', err.message);
     console.error('Stack trace:', err.stack);
   }
 }
