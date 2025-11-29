@@ -1,17 +1,38 @@
 import { haversineDistance } from './haversine.js';
 
+/**
+ * Rozszerzona funkcja budująca graf z dodatkowymi metadanymi o drogach
+ * @param {Object} osmData - Dane z Overpass API
+ * @returns {Object} { nodes, graph, wayMetadata }
+ */
 export function buildGraphForDijkstra(osmData) {
   const nodes = new Map();
   const graph = {};
+  const wayMetadata = new Map(); // Przechowuje metadane o drogach
 
+  // Zbierz wszystkie węzły
   for (const el of osmData.elements) {
     if (el.type === 'node') {
       nodes.set(el.id, { lat: el.lat, lon: el.lon });
     }
   }
 
+  // Buduj graf z metadanymi
   for (const el of osmData.elements) {
     if (el.type === 'way' && el.nodes.length >= 2) {
+      const tags = el.tags || {};
+      
+      // Zbierz metadane drogi
+      const metadata = {
+        highway: tags.highway,
+        surface: tags.surface || 'unknown',
+        width: tags.width,
+        lit: tags.lit,
+        smoothness: tags.smoothness,
+        name: tags.name,
+        wayId: el.id
+      };
+
       for (let i = 0; i < el.nodes.length - 1; i++) {
         const a = el.nodes[i];
         const b = el.nodes[i + 1];
@@ -30,13 +51,73 @@ export function buildGraphForDijkstra(osmData) {
 
         graph[keyA][keyB] = dist;
         graph[keyB][keyA] = dist;
+
+        // Zapisz metadane dla krawędzi (w obie strony)
+        const edgeKey = `${keyA}-${keyB}`;
+        const edgeKeyReverse = `${keyB}-${keyA}`;
+        wayMetadata.set(edgeKey, metadata);
+        wayMetadata.set(edgeKeyReverse, metadata);
       }
     }
   }
 
-  return { nodes, graph };
+  return { nodes, graph, wayMetadata };
 }
 
+/**
+ * NOWA funkcja wydobywająca metadane dla całej trasy
+ * @param {Array} pathNodes - Tablica ID węzłów trasy
+ * @param {Map} wayMetadata - Mapa metadanych krawędzi
+ * @returns {Object} { surfaces, highways, segments }
+ */
+export function extractRouteMetadata(pathNodes, wayMetadata) {
+  const routeMetadata = {
+    surfaces: [],
+    highways: [],
+    segments: []
+  };
+
+  for (let i = 0; i < pathNodes.length - 1; i++) {
+    const edgeKey = `${pathNodes[i]}-${pathNodes[i + 1]}`;
+    const metadata = wayMetadata.get(edgeKey);
+
+    if (metadata) {
+      routeMetadata.surfaces.push(metadata.surface);
+      routeMetadata.highways.push(metadata.highway);
+      routeMetadata.segments.push({
+        from: pathNodes[i],
+        to: pathNodes[i + 1],
+        surface: metadata.surface,
+        highway: metadata.highway,
+        width: metadata.width,
+        lit: metadata.lit,
+        smoothness: metadata.smoothness,
+        name: metadata.name,
+        wayId: metadata.wayId
+      });
+    } else {
+      // Brak metadanych dla tego segmentu
+      routeMetadata.surfaces.push('unknown');
+      routeMetadata.highways.push('unknown');
+      routeMetadata.segments.push({
+        from: pathNodes[i],
+        to: pathNodes[i + 1],
+        surface: 'unknown',
+        highway: 'unknown'
+      });
+    }
+  }
+
+  return routeMetadata;
+}
+
+/**
+ * Znajduje najbliższy węzeł do podanych współrzędnych
+ * @param {number} lat - Szerokość geograficzna
+ * @param {number} lon - Długość geograficzna
+ * @param {Map} nodes - Mapa węzłów
+ * @returns {number|null} ID najbliższego węzła
+ */
 export function findNearestNode(lat, lon, nodes) {
   let nearestId = null;
   let minDist = Infinity;
@@ -52,7 +133,13 @@ export function findNearestNode(lat, lon, nodes) {
   return nearestId;
 }
 
-// POPRAWIONA funkcja sprawdzająca połączenia
+/**
+ * Sprawdza czy dwa węzły są połączone w grafie (BFS)
+ * @param {Object} graph - Graf
+ * @param {string} start - ID węzła początkowego
+ * @param {string} end - ID węzła końcowego
+ * @returns {boolean} Czy węzły są połączone
+ */
 export function areConnected(graph, start, end) {
   // Sprawdź czy węzły istnieją w grafie
   if (!graph[start] || !graph[end]) {
@@ -96,7 +183,11 @@ export function areConnected(graph, start, end) {
   return false;
 }
 
-// DODATKOWA funkcja - znajdź składowe spójne
+/**
+ * Znajduje wszystkie składowe spójne w grafie
+ * @param {Object} graph - Graf
+ * @returns {Array<Set>} Tablica składowych spójnych
+ */
 export function findConnectedComponents(graph) {
   const visited = new Set();
   const components = [];
@@ -123,6 +214,9 @@ export function findConnectedComponents(graph) {
       components.push(component);
     }
   }
+  
+  // Sortuj składowe od największej do najmniejszej
+  components.sort((a, b) => b.size - a.size);
   
   return components;
 }

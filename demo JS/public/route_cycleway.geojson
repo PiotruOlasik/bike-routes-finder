@@ -4,7 +4,36 @@
     {
       "type": "Feature",
       "properties": {
-        "distance_km": 2.1262689807348756
+        "distance_km": 2.1262689807348756,
+        "surfaces": [
+          "asphalt",
+          "asphalt",
+          "asphalt",
+          "asphalt",
+          "asphalt",
+          "asphalt",
+          "asphalt"
+        ],
+        "unique_surfaces": [
+          "asphalt"
+        ],
+        "highways": [
+          "unclassified"
+        ],
+        "segments_count": 7,
+        "surface_statistics": {
+          "asphalt": 7
+        },
+        "bike_type": "szosowy",
+        "evaluation": {
+          "suitable": true,
+          "status": "success",
+          "message": "✅ Trasa jest odpowiednia dla roweru typu: szosowy",
+          "not_allowed_surfaces": [],
+          "all_surfaces": [
+            "asphalt"
+          ]
+        }
       },
       "geometry": {
         "type": "LineString",
