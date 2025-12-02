@@ -28,7 +28,7 @@
         "evaluation": {
           "suitable": true,
           "status": "success",
-          "message": "✅ Trasa jest odpowiednia dla roweru typu: szosowy",
+          "message": "Trasa jest odpowiednia dla roweru typu: szosowy",
           "not_allowed_surfaces": [],
           "all_surfaces": [
             "asphalt"
