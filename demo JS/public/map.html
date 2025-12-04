@@ -237,22 +237,22 @@
 </head>
 <body>
   <div class="header">
-    <h1 id="title">🚴 Ładowanie trasy...</h1>
+    <h1 id="title"> Ładowanie trasy...</h1>
     <div class="stats-grid" id="stats-grid">
       <div class="stat-card">
-        <div class="stat-label">📏 Długość trasy</div>
+        <div class="stat-label">Długość trasy</div>
         <div class="stat-value" id="distance">-</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">🚲 Typ roweru</div>
+        <div class="stat-label"> Typ roweru</div>
         <div class="stat-value" id="bike-type">-</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">🛣️ Liczba segmentów</div>
+        <div class="stat-label"> Liczba segmentów</div>
         <div class="stat-value" id="segments">-</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">🗺️ Punkty trasy</div>
+        <div class="stat-label"> Punkty trasy</div>
         <div class="stat-value" id="nodes">-</div>
       </div>
     </div>
@@ -261,7 +261,7 @@
   <div class="info-panel">
     <div class="info-section">
       <div class="info-title">
-        <span>🛣️</span>
+        <span></span>
         <span>Nawierzchnie na trasie</span>
       </div>
       <div class="surface-list" id="surfaces">
@@ -345,7 +345,7 @@
             className: '',
             iconSize: [30, 30]
           })
-        }).addTo(map).bindPopup('🚩 Start');
+        }).addTo(map).bindPopup(' Start');
         
         L.marker([endCoord[1], endCoord[0]], {
           icon: L.divIcon({
@@ -353,14 +353,14 @@
             className: '',
             iconSize: [30, 30]
           })
-        }).addTo(map).bindPopup('🏁 Meta');
+        }).addTo(map).bindPopup(' Meta');
 
         // Dopasowanie mapy do trasy
         map.fitBounds(routeLayer.getBounds(), { padding: [50, 50] });
 
         // Aktualizacja interfejsu
         const distanceKm = props.distance_km;
-        document.getElementById('title').textContent = `🚴 Trasa rowerowa`;
+        document.getElementById('title').textContent = ` Trasa rowerowa`;
         document.getElementById('distance').textContent = distanceKm.toFixed(2) + ' km';
         document.getElementById('bike-type').textContent = props.bike_type || 'Nieokreślony';
         document.getElementById('segments').textContent = props.segments_count || '-';
@@ -422,12 +422,12 @@
           
           if (props.evaluation.not_allowed_surfaces && 
               props.evaluation.not_allowed_surfaces.length > 0) {
-            detailsHTML += `<div>❌ Niedozwolone nawierzchnie: ${props.evaluation.not_allowed_surfaces.join(', ')}</div>`;
+            detailsHTML += `<div> Niedozwolone nawierzchnie: ${props.evaluation.not_allowed_surfaces.join(', ')}</div>`;
           }
           
           if (props.evaluation.unknown_segments !== undefined) {
             const percentage = ((props.evaluation.unknown_segments / props.evaluation.total_segments) * 100).toFixed(1);
-            detailsHTML += `<div>⚠️ Segmentów z nieznaną nawierzchnią: ${props.evaluation.unknown_segments}/${props.evaluation.total_segments} (${percentage}%)</div>`;
+            detailsHTML += `<div> Segmentów z nieznaną nawierzchnią: ${props.evaluation.unknown_segments}/${props.evaluation.total_segments} (${percentage}%)</div>`;
           }
           
           evaluationDetails.innerHTML = detailsHTML;
@@ -441,15 +441,15 @@
             <div class="legend-title">Legenda</div>
             <div class="legend-item">
               <div class="legend-color" style="background: ${statusColors.success};"></div>
-              <span>✅ Trasa odpowiednia</span>
+              <span> Trasa odpowiednia</span>
             </div>
             <div class="legend-item">
               <div class="legend-color" style="background: ${statusColors.warning};"></div>
-              <span>⚠️ Brak pełnych danych</span>
+              <span> Brak pełnych danych</span>
             </div>
             <div class="legend-item">
               <div class="legend-color" style="background: ${statusColors.error};"></div>
-              <span>❌ Trasa nieodpowiednia</span>
+              <span> Trasa nieodpowiednia</span>
             </div>
           `;
           return div;
@@ -459,7 +459,7 @@
       })
       .catch(err => {
         console.error('Błąd wczytywania GeoJSON:', err);
-        document.getElementById('title').textContent = "❌ Błąd ładowania trasy";
+        document.getElementById('title').textContent = " Błąd ładowania trasy";
         
         const errorDiv = document.createElement('div');
         errorDiv.className = 'error-message';
@@ -467,7 +467,7 @@
           <strong>Nie można załadować danych trasy</strong><br>
           <small>Szczegóły: ${err.message}</small><br>
           <small style="margin-top: 10px; display: block;">
-            💡 Upewnij się, że plik <code>route_cycleway.geojson</code> istnieje w katalogu <code>public/</code>
+           Upewnij się, że plik <code>route_cycleway.geojson</code> istnieje w katalogu <code>public/</code>
           </small>
         `;
         
