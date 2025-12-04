@@ -54,7 +54,7 @@ function cleanLineCoordinates(coordinates) {
     }
   }
   
-  // Krok 2: Usuń backtracking (A→B→A)
+  // Krok 2: Usuń backtracking 
   const finalCleaned = removeBacktracking(cleaned);
   
   return finalCleaned;
